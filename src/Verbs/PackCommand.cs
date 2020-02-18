@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using CommandLine;
 using Semver;
@@ -9,7 +10,7 @@ using Umbraco.Packager.CI.Properties;
 namespace Umbraco.Packager.CI.Verbs
 {
     [Verb("pack", HelpText = "Create an umbraco package from a folder or package.xml file")]
-    public class PackOptions
+    public class PackOptions : IUmbOptions
     {
         [Value(0, MetaName = "file/folder", Required = true,
             HelpText = "package.xml file or folder you want to crate package for")]
@@ -45,9 +46,9 @@ namespace Umbraco.Packager.CI.Verbs
     ///  and copy the content of the folder to the App_Plugins folder
     ///  the structure of the folder beneath this level is also preserved.
     /// </remarks>
-    internal static class PackCommand
+    internal class PackCommand : IUmbCommand<PackOptions>
     {
-        public static int RunAndReturn(PackOptions options)
+        public async Task<int> Run(PackOptions options)
         {
             // make sure the output directory exists
             Directory.CreateDirectory(options.OutputDirectory);
@@ -74,6 +75,7 @@ namespace Umbraco.Packager.CI.Verbs
                 isFolder = true;
                 packageFile = Path.Combine(options.FolderOrFile, "package.xml");
                 Console.WriteLine("Building package from folder: {0}", options.FolderOrFile);
+
             }
             else
             {
@@ -115,7 +117,7 @@ namespace Umbraco.Packager.CI.Verbs
             return 0;
         }
 
-        private static string CreateWorkingFolder(string path, string subFolder = "", bool clean = true) 
+        private string CreateWorkingFolder(string path, string subFolder = "", bool clean = true) 
         {
             var folder = Path.Combine(path, subFolder);
             
@@ -126,7 +128,7 @@ namespace Umbraco.Packager.CI.Verbs
             return folder;
         }
 
-        private static string GetPackageFileName(string folder, XElement packageFile, string version)
+        private string GetPackageFileName(string folder, XElement packageFile, string version)
         {
 
             var nameNode = packageFile.Element("info")?.Element("package")?.Element("name");
@@ -143,7 +145,7 @@ namespace Umbraco.Packager.CI.Verbs
             return "";
         }
 
-        private static string GetOrSetPackageVersion(XElement packageXml, string version)
+        private string GetOrSetPackageVersion(XElement packageXml, string version)
         {
             if (!string.IsNullOrWhiteSpace(version))
             {
@@ -168,7 +170,7 @@ namespace Umbraco.Packager.CI.Verbs
         }
 
 
-        private static void AddFilesFromFolders(string sourceFolder, string dest, string prefix = "")
+        private void AddFilesFromFolders(string sourceFolder, string dest, string prefix = "")
         {
             Console.WriteLine("Adding Folder: {0}", sourceFolder);
 
@@ -185,14 +187,14 @@ namespace Umbraco.Packager.CI.Verbs
             }
         }
 
-        private static void AddFile(string sourceFile, string dest, string prefix = "")
+        private void AddFile(string sourceFile, string dest, string prefix = "")
         {
             Console.WriteLine("Adding File: {0}", dest);
             var destination = Path.Combine(prefix, dest);
             File.Copy(sourceFile, destination);
         }
 
-        private static void AddFilesBasedOnPackageXml(XElement package, string tempFolder)
+        private void AddFilesBasedOnPackageXml(XElement package, string tempFolder)
         {
             var fileNodes = package.Elements("files");
 
@@ -214,7 +216,7 @@ namespace Umbraco.Packager.CI.Verbs
             }
         }
 
-        private static (string path, string orgPath) GetPathAndOrgPath(XElement node)
+        private (string path, string orgPath) GetPathAndOrgPath(XElement node)
         {
             var orgPath = node.Attribute("orgPath")?.Value;
             var path = node.Attribute("path")?.Value;
@@ -227,7 +229,7 @@ namespace Umbraco.Packager.CI.Verbs
             return (path, orgPath);
         }
 
-        private static void BuildPackageFolder(XElement package, string sourceFolder, string flatFolder)
+        private void BuildPackageFolder(XElement package, string sourceFolder, string flatFolder)
         {
             var filesNode = package.Element("files");
 
@@ -266,7 +268,7 @@ namespace Umbraco.Packager.CI.Verbs
 
             package.Save(Path.Combine(flatFolder, "package.xml"));
         }
-        private static void CreateZip(string folder, string zipFileName)
+        private void CreateZip(string folder, string zipFileName)
         {
             if (Directory.Exists(folder))
             {

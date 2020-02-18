@@ -15,7 +15,7 @@ namespace Umbraco.Packager.CI.Verbs
     ///  Options for the Push verb
     /// </summary>
     [Verb("push", HelpText = "Pushes an umbraco package to our.umbraco.com")]
-    public class PushOptions
+    public class PushOptions : IUmbOptions
     {
         [Value(0, MetaName = "package.zip", Required = true,
             HelpText = "Path to the package zip you want to push")]
@@ -29,9 +29,21 @@ namespace Umbraco.Packager.CI.Verbs
     }
 
 
-    internal static class PushCommand
+    internal class PushCommand: IUmbCommand<PushOptions>
     {
-        public static async Task<int> RunAndReturn(PushOptions options)
+        private readonly TextReader reader;
+        private readonly TextWriter writer;
+
+        public PushCommand(TextReader reader, TextWriter writer)
+        {
+            this.reader = reader;
+            this.writer = writer;
+
+            Console.WriteLine("Using Console");
+            writer.Write("Using writer");
+        }
+
+        public async Task<int> Run(PushOptions options)
         {
             // --package=MyFile.zip
             // --package=./MyFile.zip
@@ -78,7 +90,7 @@ namespace Umbraco.Packager.CI.Verbs
             return 0;
         }
 
-        private static async Task UploadPackage(string filePath, string apiKey)
+        private async Task UploadPackage(string filePath, string apiKey)
         {
             try
             {

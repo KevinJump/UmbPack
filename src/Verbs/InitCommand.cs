@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using CommandLine;
@@ -17,7 +18,7 @@ namespace Umbraco.Packager.CI.Verbs
     ///  Command line options for the Init verb
     /// </summary>
     [Verb("init", HelpText = "Initializes a package.xml file")]
-    public class InitOptions
+    public class InitOptions : IUmbOptions
     {
         [Value(0,
             MetaName = "Package File",
@@ -36,10 +37,11 @@ namespace Umbraco.Packager.CI.Verbs
     ///  Works like npm init, makes some guesses as to what defaults to use
     ///  and lets the user enter values, at the end it writes out a package.xml file
     /// </remarks>
-    internal static class InitCommand
+    internal class InitCommand : IUmbCommand<InitOptions>
     {
-        public static void RunAndReturn(InitOptions options)
+        public async Task<int> Run(InitOptions options)
         {
+            Console.WriteLine("Running Init");
 
             if (!string.IsNullOrWhiteSpace(options.NuSpecFile))
             {
@@ -82,11 +84,12 @@ namespace Umbraco.Packager.CI.Verbs
             if (confirm[0] == 'Y')
             {
                 node.Save(packageFile);
-                Environment.Exit(0);
+                return 0;
             }
             else
             {
-                Environment.Exit(1);
+                return 1;
+
             }
         }
 
@@ -95,7 +98,7 @@ namespace Umbraco.Packager.CI.Verbs
         /// </summary>
         /// <param name="options">options enterd by the user</param>
         /// <returns>XElement containing the package.xml info</returns>
-        private static XElement MakePackageFile(PackageSetup options)
+        private XElement MakePackageFile(PackageSetup options)
         {
             var node = new XElement("umbPackage");
 
@@ -145,7 +148,7 @@ namespace Umbraco.Packager.CI.Verbs
         /// </summary>
         /// <param name="licenceName">Licence Name (e.g MIT)</param>
         /// <returns>URL for the licence file</returns>
-        private static string GetLicenceUrl(string licenceName)
+        private string GetLicenceUrl(string licenceName)
         {
             // TODO - get licence urls from somewhere?
             if (licenceName.Equals("MIT", StringComparison.InvariantCultureIgnoreCase))
@@ -162,7 +165,7 @@ namespace Umbraco.Packager.CI.Verbs
         /// <param name="prompt">text to put in prompt</param>
         /// <param name="defaultValue">default value if user just presses enter</param>
         /// <returns>SemVersion compatable version</returns>
-        private static SemVersion GetVersionString(string prompt, string defaultValue)
+        private SemVersion GetVersionString(string prompt, string defaultValue)
         {
             while (true)
             {
@@ -184,7 +187,7 @@ namespace Umbraco.Packager.CI.Verbs
         /// <param name="prompt">Prompt for user</param>
         /// <param name="defaultValue">Default value if they just press enter</param>
         /// <returns>user value or default</returns>
-        private static string GetUserInput(string prompt, string defaultValue)
+        private string GetUserInput(string prompt, string defaultValue)
         {
             Console.Write($"{prompt}: ");
             if (!string.IsNullOrWhiteSpace(defaultValue))
@@ -203,7 +206,7 @@ namespace Umbraco.Packager.CI.Verbs
         ///  Validates the path to where the package file is going to be created
         /// </summary>
         /// <param name="packageFile">path to a package file</param>
-        private static string GetPackageFile(string packageFile)
+        private string GetPackageFile(string packageFile)
         {
             var currentFolder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             var filePath = Path.Combine(currentFolder, "package.xml");
