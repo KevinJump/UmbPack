@@ -135,13 +135,22 @@ namespace Umbraco.Packager.CI.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to This utility will walk you through creating a package.xml file.
-        ///It only covers the most common items, and trys to guess sensible defaults
+        ///It only covers the most common items, and tries to guess sensible defaults
         ///
-        ///see ??? for definitive documentation of those fields and excatly what they do.
+        ///see ??? for definitive documentation of those fields and exactly what they do.
         /// </summary>
         internal static string Init_Header {
             get {
                 return ResourceManager.GetString("Init.Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sorry, license should be a valid SPDX license expression (without &quot;LicenseRef&quot;) or &quot;UNLICENSED&quot;.
+        /// </summary>
+        internal static string Init_InvalidLicence {
+            get {
+                return ResourceManager.GetString("Init.InvalidLicence", resourceCulture);
             }
         }
         
@@ -182,7 +191,7 @@ namespace Umbraco.Packager.CI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to It this OK?.
+        ///   Looks up a localized string similar to Is this OK?.
         /// </summary>
         internal static string Init_Prompt {
             get {
@@ -254,7 +263,7 @@ namespace Umbraco.Packager.CI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Building package from package from package.xml.
+        ///   Looks up a localized string similar to Building package from package.xml.
         /// </summary>
         internal static string Pack_BuildingFile {
             get {
@@ -353,7 +362,7 @@ namespace Umbraco.Packager.CI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The package &apos;{0}&apos; was sucessfully uploaded to our.umbraco.com.
+        ///   Looks up a localized string similar to The package &apos;{0}&apos; was successfully uploaded to our.umbraco.com.
         /// </summary>
         internal static string Push_Complete {
             get {
@@ -362,7 +371,7 @@ namespace Umbraco.Packager.CI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Extracting info form package.xml file.
+        ///   Looks up a localized string similar to Extracting info from package.xml file.
         /// </summary>
         internal static string Push_Extracting {
             get {

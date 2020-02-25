@@ -154,6 +154,9 @@ It only covers the most common items, and tries to guess sensible defaults
 
 see ??? for definitive documentation of those fields and exactly what they do</value>
   </data>
+  <data name="Init.InvalidLicence" xml:space="preserve">
+    <value>Sorry, license should be a valid SPDX license expression (without "LicenseRef") or "UNLICENSED"</value>
+  </data>
   <data name="Init.InvalidVersion" xml:space="preserve">
     <value>Invalid Version: '{0}'</value>
   </data>

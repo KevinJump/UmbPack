@@ -1,10 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using CommandLine;
-
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Semver;
 
 using Umbraco.Packager.CI.Properties;
@@ -70,7 +73,7 @@ namespace Umbraco.Packager.CI.Verbs
 
             setup.Website = GetUserInput(Resources.Init_Website, Defaults.Init_Website);
 
-            setup.Licence = GetUserInput(Resources.Init_Licence, Defaults.Init_Licence);
+            (setup.Licence, setup.LicenceUrl) = GetLicence(Resources.Init_Licence, Defaults.Init_Licence);
 
             // play it back for confirmation
             Console.WriteLine();
@@ -113,7 +116,7 @@ namespace Umbraco.Packager.CI.Verbs
             package.Add(new XElement("version", options.Version));
             package.Add(new XElement("iconUrl", ""));
             package.Add(new XElement("licence", options.Licence,
-                new XAttribute("url", GetLicenceUrl(options.Licence))));
+                new XAttribute("url", options.LicenceUrl)));
             
             package.Add(new XElement("url", options.Url));
             package.Add(new XElement("requirements",
@@ -148,13 +151,71 @@ namespace Umbraco.Packager.CI.Verbs
         }
 
         /// <summary>
+        ///  Prompt the user to enter a licence (or use default)
+        /// </summary>
+        private static (string, string) GetLicence(string prompt, string defaultValue)
+        {
+            while (true)
+            {
+                var licenceValue = GetUserInput(prompt, defaultValue);
+                var url = GetLicenceUrl(licenceValue);
+
+                if (url != null)
+                {
+                    return (licenceValue, url);
+                }
+                else
+                {
+                    Console.WriteLine(Resources.Init_InvalidLicence);
+                }
+            }
+        }
+
+        /// <summary>
         ///  Workout the URL for the licence based on the string value
         /// </summary>
         /// <param name="licenceName">Licence Name (e.g MIT)</param>
         /// <returns>URL for the licence file</returns>
         private static string GetLicenceUrl(string licenceName)
         {
-            // TODO - get licence urls from somewhere?
+            if (licenceName.Equals("UNLICENSED", StringComparison.InvariantCultureIgnoreCase)) return "";
+
+            // get the list of licences from github, see if we can match this to one of them.
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    client.BaseAddress = new Uri("https://api.github.com/");
+                    var response = Task.Run(() => client.GetAsync("/licenses")).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = Task.Run(() => response.Content.ReadAsStringAsync()).Result;
+                        var licences = JsonConvert.DeserializeObject<JArray>(content);
+
+                        var licence = licences
+                            .FirstOrDefault(x => x.Value<string>("spdx_id")
+                            .Equals(licenceName, StringComparison.InvariantCultureIgnoreCase));
+
+                        if (licence != null)
+                        {
+                            return licence.Value<string>("url");
+                        }
+                        else
+                        {
+                            return null;
+                            // Console.WriteLine(Resources.Init_InvalidLicence);
+                        }
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Unable to retreive a list of licences");
+                }
+            }
+
+            // else - if the API fails or we can't find the licence in the list. 
+            // then at least let MIT through.
             if (licenceName.Equals("MIT", StringComparison.InvariantCultureIgnoreCase))
             {
                 return "https://opensource.org/licenses/MIT";
@@ -250,6 +311,7 @@ namespace Umbraco.Packager.CI.Verbs
             public string Author { get; set; }
             public string Website { get; set; }
             public string Licence { get; set; }
+            public string LicenceUrl { get; set; }
 
             public SemVersion UmbracoVersion { get; set; }
             public string Description { get; set; }
