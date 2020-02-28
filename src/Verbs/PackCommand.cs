@@ -201,7 +201,7 @@ namespace Umbraco.Packager.CI.Verbs
         /// </summary>
         private static void AddFile(string sourceFile, string dest, string prefix = "")
         {
-            var destination = Path.Combine(prefix, dest);
+            var destination = Path.Combine(prefix, dest, Path.GetFileName(sourceFile));
             Console.WriteLine(Resources.Pack_AddingSingle, sourceFile, dest);
 
             Directory.CreateDirectory(Path.GetDirectoryName(destination));
@@ -238,8 +238,8 @@ namespace Umbraco.Packager.CI.Verbs
             if (string.IsNullOrWhiteSpace(orgPath)) orgPath = "";
 
             // remove leading and trialing slashes from anything we have.
-            orgPath = orgPath.Replace("/", "\\").Trim('\\');
-            path = path.Replace("/", "\\").Trim('\\');
+            orgPath = orgPath.Replace("/", "\\").Trim(new char[] { '\\', '~' });
+            path = path.Replace("/", "\\").Trim(new char[] { '\\', '~' });
 
             return (path, orgPath);
         }
@@ -262,7 +262,7 @@ namespace Umbraco.Packager.CI.Verbs
 
                 if (orgPath.Length > sourceFolder.Length)
                 {
-                    orgPath = orgPath.Substring(sourceFolder.Length)
+                    orgPath = "~" + orgPath.Substring(sourceFolder.Length)
                         .Replace("\\", "/");
                 }
 

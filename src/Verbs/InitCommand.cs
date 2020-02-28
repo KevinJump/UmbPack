@@ -110,8 +110,8 @@ namespace Umbraco.Packager.CI.Verbs
             var node = new XElement("umbPackage");
 
             node.Add(new XElement("files", 
-                new XComment("<folder path=\"/App_Plugins/MyContoller\" orgPath=\"~/App_Plugins/MyController\"/>"),
-                new XComment("<file path=\"/bin/release/My.Controller.dll\" orgPath=\"~/bin\" />")));
+                new XComment("<folder path=\"/App_Plugins/MyContoller\" orgPath=\"/App_Plugins/MyController\"/>"),
+                new XComment("<file path=\"/bin/release/My.Controller.dll\" orgPath=\"/bin\" />")));
 
             var info = new XElement("info");
 
