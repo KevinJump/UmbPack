@@ -109,7 +109,9 @@ namespace Umbraco.Packager.CI.Verbs
         {
             var node = new XElement("umbPackage");
 
-            node.Add(new XElement("files"));
+            node.Add(new XElement("files", 
+                new XComment("<folder path=\"/App_Plugins/MyContoller\" orgPath=\"~/App_Plugins/MyController\"/>"),
+                new XComment("<file path=\"/bin/release/My.Controller.dll\" orgPath=\"~/bin\" />")));
 
             var info = new XElement("info");
 
@@ -117,12 +119,12 @@ namespace Umbraco.Packager.CI.Verbs
             package.Add(new XElement("name", options.Name));
             package.Add(new XElement("version", options.Version));
             package.Add(new XElement("iconUrl", ""));
-            package.Add(new XElement("licence", options.Licence,
+            package.Add(new XElement("license", options.Licence,
                 new XAttribute("url", options.LicenceUrl)));
             
             package.Add(new XElement("url", options.Url));
             package.Add(new XElement("requirements",
-                new XAttribute("type", "strict"),
+                new XAttribute("type", "Strict"),
                 new XElement("major", options.UmbracoVersion.Major),
                 new XElement("minor", options.UmbracoVersion.Minor),
                 new XElement("patch", options.UmbracoVersion.Patch)));
