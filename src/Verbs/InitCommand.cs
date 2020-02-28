@@ -71,7 +71,7 @@ namespace Umbraco.Packager.CI.Verbs
 
             setup.Author = GetUserInput(Resources.Init_Author, Environment.UserName);
 
-            setup.Website = GetUserInput(Resources.Init_Website, Defaults.Init_Website);
+            setup.Website = GetUserInput(Resources.Init_Website, setup.Url);
 
             (setup.Licence, setup.LicenceUrl) = GetLicence(Resources.Init_Licence, Defaults.Init_Licence);
 
@@ -109,6 +109,8 @@ namespace Umbraco.Packager.CI.Verbs
         {
             var node = new XElement("umbPackage");
 
+            node.Add(new XElement("files"));
+
             var info = new XElement("info");
 
             var package = new XElement("package");
@@ -122,22 +124,21 @@ namespace Umbraco.Packager.CI.Verbs
             package.Add(new XElement("requirements",
                 new XAttribute("type", "strict"),
                 new XElement("major", options.UmbracoVersion.Major),
-                new XElement("major", options.UmbracoVersion.Minor),
-                new XElement("major", options.UmbracoVersion.Patch)));
+                new XElement("minor", options.UmbracoVersion.Minor),
+                new XElement("patch", options.UmbracoVersion.Patch)));
             info.Add(package);
 
             info.Add(new XElement("author",
                         new XElement("name", options.Author),
                         new XElement("website", options.Website)));
 
+            info.Add(new XElement("contributors"));
+
             info.Add(new XElement("readme",
                 new XCData(options.Description)));
 
             node.Add(info);
 
-            node.Add(new XElement("files"));
-            node.Add(new XElement("Actions"));
-            node.Add(new XElement("control"));
             node.Add(new XElement("DocumentTypes"));
             node.Add(new XElement("Templates"));
             node.Add(new XElement("Stylesheets"));
@@ -145,6 +146,7 @@ namespace Umbraco.Packager.CI.Verbs
             node.Add(new XElement("DictionaryItems"));
             node.Add(new XElement("Languages"));
             node.Add(new XElement("DataTypes"));
+            node.Add(new XElement("Actions"));
 
             return node;
 
