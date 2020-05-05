@@ -25,10 +25,10 @@ jobs:
         
     # get other package dependencies
     - name: Install Dependencies
-      run: dotnet restore
+      run: dotnet restore src/UmbPack.sln
       
     # build the project 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build src/UmbPack.sln --configuration Release --no-restore
     
     # TODO: Package it up and publish somewhere? 
